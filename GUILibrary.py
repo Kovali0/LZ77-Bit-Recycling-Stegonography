@@ -1,6 +1,7 @@
 """ Module with GUI components """
 
 from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QVBoxLayout, QPushButton
+import LZ77Algo as lz
 
 
 class MainWindow():
@@ -14,10 +15,13 @@ class MainWindow():
         self.open_file_btn = QPushButton("Open")
         self.open_file_btn.clicked.connect(lambda: self.openFile())
         self.file_label = QLabel("")
+        self.compress_btn = QPushButton("Compress")
+        self.compress_btn.clicked.connect(lambda: self.startCompressingProcess())
         self.main_layout = QVBoxLayout()
         self.main_layout.addWidget(self.input_label)
         self.main_layout.addWidget(self.open_file_btn)
         self.main_layout.addWidget(self.file_label)
+        self.main_layout.addWidget(self.compress_btn)
         self.main_window.setLayout(self.main_layout)
         self.main_window.setWindowTitle("LZ77 Compressing Application")
 
@@ -32,3 +36,9 @@ class MainWindow():
         """Method for rendering Main Window.""
         :return: none"""
         self.main_window.show()
+
+    def startCompressingProcess(self):
+        """Emitter for LZ77 compressing method
+        :return: none"""
+        algo = lz.LZ77()
+        algo.compressFile(self.file_path)
