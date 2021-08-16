@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # alphabet1 = ['AAB', 'ACBC', 'CAB', 'BC']
     # alphabet1 = ['ABBA', 'AAB']
     alphabet1 = ['A', 'B']
-    msg1 = random_msg(alphabet1, 30)
+    msg1 = random_msg(alphabet1, 500)
     # msg1 = "AABACBCAABAACBCACBCAAABAABBC"
     print(msg1)
     msg1_enc = LZ77Coder.encode(msg1)
