@@ -8,7 +8,7 @@ class NumeralSystemCoder:
 
     def __init__(self, limits, norm_shift=16, norm_limit=(1 << 32)):
         """:param limits: limits in the numeral system"""
-        self.limits = limits
+        self.limits = np.array(limits).astype(np.int64)
         self.__norm_shift = norm_shift
         self.__norm_limit_up = norm_limit
         self.__norm_limit_low = 1 << norm_shift
@@ -22,12 +22,21 @@ class NumeralSystemCoder:
         return int(np.floor(sum(np.log2(i) for i in self.limits)))
 
     @staticmethod
-    def sequence_to_number(seq, n_lims) -> int:
+    def sequence_to_number(seq, n_lims) -> str:
         """Codes a sequence in given numeral system into a number"""
         res = 0
         for i in range(len(n_lims)):
-            res = seq[i] + n_lims[i] * res
-        return res
+            res = int(seq[i]) + int(n_lims[i]) * res
+        return bin(res).replace('0b', '')
+
+    @staticmethod
+    def number_to_sequence(code, n_lims) -> list:
+        code = int(code, 2)
+        seq = []
+        for n_i in n_lims[::-1]:
+            seq.append(code % n_i)
+            code = code // n_i
+        return seq[::-1]
 
     def sequence_to_bits(self, seq: np.ndarray) -> str:
         """Codes a sequence of integer numbers in the numeral system to the binary stream"""
