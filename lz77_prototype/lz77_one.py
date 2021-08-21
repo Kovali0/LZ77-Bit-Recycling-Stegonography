@@ -24,8 +24,8 @@ class LZ77Coder:
     # sep2 = chr(30)
     _sep1 = '-'
     _sep2 = '_'
-    max_offset = 100
-    max_lookahead = 100
+    max_offset = 5000
+    max_lookahead = 50
 
     @staticmethod
     def encode(msg):
@@ -92,17 +92,19 @@ if __name__ == '__main__':
 
     # alphabet1 = ['AAB', 'ACBC', 'CAB', 'BC']
     # alphabet1 = ['ABBA', 'AAB']
+    with open('..\\sample_data\\sampleFICT2.txt') as f:
+        msg1 = f.read(5000)
     alphabet1 = ['A', 'B']
-    msg1 = random_msg(alphabet1, 500)
+    # msg1 = random_msg(alphabet1, 5000)
     # msg1 = "AABACBCAABAACBCACBCAAABAABBC"
     print(msg1)
     msg1_enc = LZ77Coder.encode(msg1)
     print(msg1_enc)
+    msg1_dec = LZ77Coder.decode(msg1_enc)
+    print(msg1_dec)
     print("original length:", len(msg1))
     print("encoded length:", len(msg1_enc))
     print("ratio:", len(msg1_enc) / len(msg1))
     print("encoded ~separator 1:", len(msg1_enc.replace(LZ77Coder._sep1, '')))
-    msg1_dec = LZ77Coder.decode(msg1_enc)
-    print(msg1_dec)
     print(msg1 == msg1_dec)
     print(msg1[:-1] == msg1_dec[:-1])

@@ -2,7 +2,6 @@ import random
 import re
 import math
 import numpy as np
-import bisect
 # from .lz77_one import random_msg
 from numeral_system_coder import NumeralSystemCoder
 import string_binary
@@ -16,14 +15,14 @@ class LZ77MultiChoiceCoder:
 
     _sep1 = '-'
     _sep2 = '_'
-    max_lookbehind = 5000
-    max_lookahead = 20
+    max_lookbehind = 25000
+    max_lookahead = 50
     limit_lookbehind = True
 
     def __init__(self):
         # Numeral system coder
         # self._ns_coder = NumeralSystemCoder(limits=[])
-        self._ns_coder = None
+        # self._ns_coder = None
         # Limits of the numeral system coder
         self._ns_limits = []
         # Array of (distances, length, character) triples
@@ -90,7 +89,7 @@ class LZ77MultiChoiceCoder:
     def complete_encoding_hide_message(self, hidden_data: str) -> str:
         """Completes the compression along with storing hidden data"""
         # Convert binary stream to a sequence of choices of distances
-        self._ns_coder = NumeralSystemCoder(limits=self._ns_limits)
+        # self._ns_coder = NumeralSystemCoder(limits=self._ns_limits)
         # hidden_data_seq = self._ns_coder.bits_to_sequence(hidden_data)
         # Convert characters to bit sequence
         hidden_data = string_binary.string_to_bits(hidden_data)
@@ -152,101 +151,16 @@ class LZ77MultiChoiceCoder:
     def hidden_capacity_characters(self) -> int:
         return self._hidden_capacity // string_binary._char_length
 
-    @staticmethod
-    def encode_random_choices(data):
-        data_enc = ""
-        cursor = 0
-        # List of choices of distances to form a side channel (for testing)
-        match_distance_choices = []
-        # Number of different messages that can be stored in the side channel
-        # side_channel_total_msgs = 1
-        side_channel_capacity = 0
-        # advance the cursor through the whole message
-        while cursor < len(data):
-            if LZ77MultiChoiceCoder.limit_lookbehind:
-                # data segment to look for matches
-                data_offset = data[max(cursor - LZ77MultiChoiceCoder.max_lookbehind, 0): cursor]
-            else:
-                data_offset = data[0: cursor]
-            # number of bytes (starting from the cursor) to search for matches
-            lookahead = 1
-            # next segment of the data to be matched
-            buffer = ""
-            while lookahead <= LZ77MultiChoiceCoder.max_lookahead:
-                buffer_end = cursor + lookahead
-                # If the buffer exceeds data sequence, stop
-                if buffer_end > len(data):
-                    break
-                buffer = data[cursor: buffer_end]
-                # check if the buffer is matched at least once
-                if data_offset.find(buffer) == -1:
-                    # Cut buffer by one (to the longest matched)
-                    buffer = buffer[:-1]
-                    break
-                lookahead += 1
-
-            # Decrement lookahead to the largest acceptable value
-            lookahead -= 1
-            # Distances from starting positions of matches to the cursor
-            match_distances = [len(data_offset) - m.start() for m in re.finditer(buffer, data_offset)]
-            num_of_choices = len(match_distances)
-            # Choice of one distance - random
-            dist_choice_no = random.randint(0, num_of_choices-1)
-            if num_of_choices > 1:
-                match_distance_choices.append((dist_choice_no, len(match_distances)))
-                # side_channel_total_msgs *= num_of_choices
-                side_channel_capacity += math.log2(num_of_choices)
-            # DLC - distance, length, character triple
-            DLC = LZ77MultiChoiceCoder._sep2 + str(match_distances[dist_choice_no]) \
-                  + LZ77MultiChoiceCoder._sep1 + str(lookahead) + LZ77MultiChoiceCoder._sep1
-            cursor += lookahead
-            if cursor < len(data):
-                DLC += data[cursor]
-            data_enc += DLC
-            cursor += 1
-        # print("side channel:", match_distance_choices)
-        # first character is a separator, ignore it
-        print("Side channel:")
-        # print("Different messages to send:", side_channel_total_msgs)
-        # side_channel_bits2 = int(math.floor(math.log2(side_channel_total_msgs)))
-        # print("side_channel_bits2:", side_channel_bits2)
-        side_channel_bits = int(math.floor(side_channel_capacity))
-        print("Channel capacity: {} bits ({} bytes)".format(side_channel_bits, side_channel_bits / 8))
-        return data_enc[1:], match_distance_choices
-
-    @staticmethod
-    def decode_with_distances(data_enc):
-        """Decodes both explicit compressed data and message from the hidden channel"""
-        if data_enc == "":
-            return ""
-        data_dec = ""
-        distance_choices = []
-        DLCs = data_enc.split(LZ77MultiChoiceCoder._sep2)
-        for DLC in DLCs:
-            distance, length, character = DLC.split(LZ77MultiChoiceCoder._sep1)
-            distance, length = int(distance), int(length)
-            # the repeated and copied part of data
-            matched_substring = data_dec[len(data_dec) - distance: len(data_dec) - distance + length]
-            if LZ77MultiChoiceCoder.limit_lookbehind:
-                data_offset = data_dec[max(0, len(data_dec) - LZ77MultiChoiceCoder.max_lookbehind):]
-            else:
-                data_offset = data_dec
-            data_dec += matched_substring + character
-            # get distances of all possible matches
-            match_distances = [len(data_offset) - m.start() for m in re.finditer(matched_substring, data_offset)]
-            # get index of the chosen match distance
-            # distance_idx = bisect.bisect_left(match_distances, distance)
-            distance_idx = match_distances.index(distance)
-            if len(match_distances) > 1:
-                distance_choices.append((distance_idx, len(match_distances)))
-        return data_dec, distance_choices
-
-
-
-
+import os
 if __name__ == '__main__':
-    alphabet = ['A', 'B']
-    msg1 = random_msg(alphabet, 20000)
+    print(os.listdir('..\\sample_data'))
+    fname = '..\\sample_data\\sampleFICT2.txt'
+    with open(fname, 'r') as f:
+        msg1 = f.read(10000)
+    # alphabet = ['A', 'B', 'C']
+    # msg1 = random_msg(alphabet, 30000)
+
+
     lz_coder = LZ77MultiChoiceCoder()
     msg1_n_hidden_bits = lz_coder.start_encoding_get_capacity(msg1)
     print("Hidden channel capacity: {} ({} characters)".format(msg1_n_hidden_bits,
@@ -261,6 +175,9 @@ if __name__ == '__main__':
         print("Hidden message too long!!")
     print("hidden message:", hidden_msg1)
     msg1_enc = lz_coder.complete_encoding_hide_message(hidden_msg1)
+    msg1_enc_len = len(msg1_enc)
+    print("Encoded message length:", msg1_enc_len)
+    print("Compression ratio:", msg1_enc_len / len(msg1))
     # print("encoded msg1:", msg1_enc)
     msg1_dec, hidden_msg1_dec = LZ77MultiChoiceCoder.decode(msg1_enc)
     print("hidden msg decoded:", hidden_msg1_dec)
