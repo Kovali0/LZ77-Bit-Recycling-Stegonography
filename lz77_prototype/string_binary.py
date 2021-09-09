@@ -3,12 +3,12 @@ _char_length = 8
 __form = "{:0" + str(_char_length) + "b}"
 
 def string_to_bits(s: str) -> str:
-    """Converts string to sequence of bits, e.g. 'cat' -> '01100011 01100001 01110100'"""
+    """Converts string to sequence of ascii bits, e.g. 'cat' -> '01100011 01100001 01110100'"""
     return "".join([__form.format(ord(c)) for c in s])
 
 
 def bits_to_string(bits: str) -> str:
-    """Converts sequence of bits back to the string"""
+    """Converts sequence of ascii bits back to the string"""
     # Fix missing leading zeros
     missing_zeros = (_char_length - len(bits) % _char_length) % _char_length
     bits = '0' * missing_zeros + bits

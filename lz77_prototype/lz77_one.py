@@ -64,7 +64,7 @@ class LZ77Coder:
             #     dist_length += msg[cursor]
 
             # Is encoded message shorter than the match?
-            if len(dist_length) < lookahead:
+            if len(dist_length) <= lookahead:
                 msg_enc += dist_length
                 cursor += lookahead
             else:
@@ -122,19 +122,23 @@ if __name__ == '__main__':
 
     # alphabet1 = ['AAB', 'ACBC', 'CAB', 'BC']
     # alphabet1 = ['ABBA', 'AAB']
-    with open('..\\sample_data\\sampleFICT2.txt') as f:
-        msg1 = f.read(75000)
+    # with open('..\\sample_data\\sampleFICT2.txt') as f:
+    #     msg1 = f.read(75000)
     alphabet1 = ['A', 'B']
-    # msg1 = random_msg(alphabet1, 6000)
+    msg1 = random_msg(alphabet1, 20000)
     # msg1 = "BABAABAAABAAABABABABBAAABABABBAABBBAABBBBABBABAABABBAAABAABAABAABBABAA"
     print(msg1)
     msg1_enc = LZ77Coder.encode(msg1)
     print(msg1_enc)
     msg1_dec = LZ77Coder.decode(msg1_enc)
-    print(msg1_dec)
+    # print(msg1_dec)
     print("original length:", len(msg1))
     print("encoded length:", len(msg1_enc))
     print("ratio:", len(msg1_enc) / len(msg1))
-    print("encoded ~separator 1:", len(msg1_enc.replace(LZ77Coder._sep1, '')))
+    # remove consequently appearing separators
+    msg1_enc_v2 = msg1_enc.replace(LZ77Coder._sep2 * 2, LZ77Coder._sep2)
+    # print("encoded v2:", msg1_enc_v2)
+    print("encoded v2 length:", len(msg1_enc_v2))
+    print("encoded v2 ratio:", len(msg1_enc_v2) / len(msg1))
     print("msg1 == msg1_dec:", msg1 == msg1_dec)
     # print(msg1[:-1] == msg1_dec[:-1])
