@@ -1,5 +1,5 @@
 # Length of a character in bits (suggested 7 or 8)
-_char_length = 8
+_char_length = 7
 __form = "{:0" + str(_char_length) + "b}"
 
 def string_to_bits(s: str) -> str:
