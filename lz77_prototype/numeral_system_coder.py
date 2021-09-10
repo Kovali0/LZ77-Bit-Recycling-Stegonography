@@ -1,4 +1,32 @@
 import numpy as np
+import lz77_side_channel as lz_sc
+
+
+"""Conversion of 10-base numbers into 254-base - all ascii 
+characters except LZ77 coder separators"""
+_alphabet = [chr(i) for i in range(256)]
+_alphabet.remove(lz_sc.LZ77MultiChoiceCoder._sep1)
+_alphabet.remove(lz_sc.LZ77MultiChoiceCoder._sep2)
+# _alphabet.remove('-')
+# _alphabet.remove('_')
+_base = len(_alphabet)
+
+
+def number_to_system(n):
+    if n == 0:
+        return _alphabet[0]
+    n_sys = []
+    while n != 0:
+        n_sys.append(n % _base)
+        n //= _base
+    return "".join(_alphabet[k] for k in n_sys[::-1])
+
+
+def system_to_number(seq):
+    n = 0
+    for c in seq:
+        n = n * _base + _alphabet.index(c)
+    return n
 
 
 class NumeralSystemCoder:

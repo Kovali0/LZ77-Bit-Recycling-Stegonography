@@ -1,9 +1,8 @@
 import random
 import re
 import math
-import numpy as np
 # from .lz77_one import random_msg
-from numeral_system_coder import NumeralSystemCoder
+import numeral_system_coder as nsc
 import string_binary
 
 def random_msg(alphabet, length):
@@ -35,7 +34,8 @@ class LZ77MultiChoiceCoder:
         self._hidden_capacity = None
 
     def start_encoding_get_capacity(self, data) -> int:
-        """:returns: side channel capacity in bits. If 0, no hidden message can be stored."""
+        """Starts encoding of a piece of data, calculates side channel capacity
+        :returns: side channel capacity in bits. If 0, no hidden message can be stored."""
         # data_enc = ""
         cursor = 0
         # Number of different messages that can be stored in the side channel
@@ -98,10 +98,6 @@ class LZ77MultiChoiceCoder:
 
         # save remaining raw block (might be empty)
         self._enc_raw_blocks.append(raw_block)
-            # if cursor < len(data):
-            #     character = data[cursor]
-            # else:
-            #     character = ''
 
         # print("side channel:", match_distance_choices)
         # first character is a separator, ignore it
@@ -111,13 +107,17 @@ class LZ77MultiChoiceCoder:
         return self._hidden_capacity
 
     def complete_encoding_hide_message(self, hidden_data: str) -> str:
-        """Completes the compression along with storing hidden data"""
+        """Completes encoding and stores hidden message in the side channel
+        :returns: compressed data with hidden message.
+        If hidden_data size exceeds side channel capacity, explicit compression will
+        succeed, but the hidden message will be damaged."""
+
         # Convert binary stream to a sequence of choices of distances
         # self._ns_coder = NumeralSystemCoder(limits=self._ns_limits)
         # hidden_data_seq = self._ns_coder.bits_to_sequence(hidden_data)
         # Convert characters to bit sequence
         hidden_data = string_binary.string_to_bits(hidden_data)
-        hidden_data_seq = NumeralSystemCoder.number_to_sequence(hidden_data, self._ns_limits)
+        hidden_data_seq = nsc.NumeralSystemCoder.number_to_sequence(hidden_data, self._ns_limits)
         data_enc = ""
         h_i = 0
         for raw_block, dists_length in zip(self._enc_raw_blocks, self._enc_dists_length):
@@ -132,8 +132,8 @@ class LZ77MultiChoiceCoder:
                 # otherwise, choose the only one
                 chosen_distance = distances[0]
             # distance-length pair message
-            dist_length_str = LZ77MultiChoiceCoder._sep2 + str(chosen_distance) + LZ77MultiChoiceCoder._sep1 \
-                        + str(dists_length[1]) + LZ77MultiChoiceCoder._sep2
+            dist_length_str = LZ77MultiChoiceCoder._sep2 + nsc.number_to_system(chosen_distance) + LZ77MultiChoiceCoder._sep1 \
+                        + nsc.number_to_system(dists_length[1]) + LZ77MultiChoiceCoder._sep2
             data_enc += dist_length_str
         # add remaining raw block
         data_enc += self._enc_raw_blocks[-1]
@@ -141,7 +141,8 @@ class LZ77MultiChoiceCoder:
 
     @staticmethod
     def decode(data_enc) -> (str, str):
-        """Decodes both explicit compressed data and the hidden channel binary stream"""
+        """Decodes both explicit compressed data and the hidden message.
+        :returns: (<decoded data>, <decoded hidden message>)"""
         if data_enc == "":
             return ""
         data_dec = ""
@@ -159,8 +160,8 @@ class LZ77MultiChoiceCoder:
             sep1_pos = data_enc.find(LZ77MultiChoiceCoder._sep1)
             sep2_pos = data_enc.find(LZ77MultiChoiceCoder._sep2)
             # decode next matched substring
-            match_dist = int(data_enc[:sep1_pos])
-            match_length = int(data_enc[sep1_pos+1: sep2_pos])
+            match_dist = nsc.system_to_number(data_enc[:sep1_pos])
+            match_length = nsc.system_to_number(data_enc[sep1_pos+1: sep2_pos])
             match_start = len(data_dec) - match_dist
             matched_substring = data_dec[match_start-match_length: match_start]
             # define offset to look for matches
@@ -181,27 +182,9 @@ class LZ77MultiChoiceCoder:
         # copy remaining raw block
         data_dec += data_enc
 
-        # DLCs = data_enc.split(LZ77MultiChoiceCoder._sep2)
-        # for DLC in DLCs:
-        #     distance, length, character = DLC.split(LZ77MultiChoiceCoder._sep1)
-        #     distance, length = int(distance), int(length)
-        #     # the repeated and copied part of data
-        #     matched_substring = data_dec[len(data_dec) - distance: len(data_dec) - distance + length]
-        #     if LZ77MultiChoiceCoder.limit_lookbehind:
-        #         data_offset = data_dec[max(0, len(data_dec) - LZ77MultiChoiceCoder.max_lookbehind):]
-        #     else:
-        #         data_offset = data_dec
-        #     data_dec += matched_substring + character
-        #     # get distances of all possible matches
-        #     match_distances = [len(data_offset) - m.start() for m in re.finditer(matched_substring, data_offset)]
-        #     # get index of the chosen match distance
-        #     distance_idx = match_distances.index(distance)
-        #     if len(match_distances) > 1:
-        #         distance_numbers.append(len(match_distances))
-        #         distance_choices.append(distance_idx)
         # ns_decoder = NumeralSystemCoder(limits=np.array(distance_numbers))
         # hidden_data = ns_decoder.sequence_to_bits(np.array(distance_choices))
-        hidden_data = NumeralSystemCoder.sequence_to_number(distance_choices, distance_numbers)
+        hidden_data = nsc.NumeralSystemCoder.sequence_to_number(distance_choices, distance_numbers)
         # Convert to characters
         hidden_data = string_binary.bits_to_string(hidden_data)
         return data_dec, hidden_data
@@ -239,13 +222,13 @@ if __name__ == '__main__':
     msg1_enc_len = len(msg1_enc)
 
     # final distances in encoded msg1
-    msg1_enc_distances = [int(m.group(0)) for m in re.finditer('[0-9]+', msg1_enc)]
-    msg1_enc_reduced_numbers = [len(str(d)) - math.ceil(math.log(d, 254)) for d in msg1_enc_distances]
-    msg1_enc_extra_len = msg1_enc_len - sum(msg1_enc_reduced_numbers)
+    # msg1_enc_distances = [int(m.group(0)) for m in re.finditer('[0-9]+', msg1_enc)]
+    # msg1_enc_reduced_numbers = [len(str(d)) - math.ceil(math.log(d, 254)) for d in msg1_enc_distances]
+    # msg1_enc_extra_len = msg1_enc_len - sum(msg1_enc_reduced_numbers)
     print("Encoded message length:", msg1_enc_len)
-    print("Encoded message, reduced:", msg1_enc_extra_len)
+    # print("Encoded message, reduced:", msg1_enc_extra_len)
     print("Compression ratio:", msg1_enc_len / len(msg1))
-    # print("encoded msg1:", msg1_enc)
+    print("encoded msg1:", msg1_enc)
     msg1_dec, hidden_msg1_dec = LZ77MultiChoiceCoder.decode(msg1_enc)
     # print("decoded msg1:", msg1_dec)
     print("hidden msg decoded:", hidden_msg1_dec)

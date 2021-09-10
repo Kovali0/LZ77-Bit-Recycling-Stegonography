@@ -1,4 +1,5 @@
 import random
+import numeral_system_coder as nsc
 
 
 def random_msg(alphabet, length):
@@ -20,8 +21,8 @@ def approx_cnt_word_in_msg(word_length, msg_length, alphabet_size):
 
 class LZ77Coder:
     """Performs the very basic LZ77 encoding & decoding"""
-    # sep1 = chr(31)
-    # sep2 = chr(30)
+    # _sep1 = chr(31)
+    # _sep2 = chr(30)
     _sep1 = '-'
     _sep2 = '_'
     max_offset = 50000
@@ -57,8 +58,8 @@ class LZ77Coder:
             # Decrement lookahead to the largest acceptable value
             lookahead -= 1
             # distance+length double
-            dist_length = LZ77Coder._sep2 + str(match_distance) + LZ77Coder._sep1 + str(lookahead) \
-                  + LZ77Coder._sep2
+            dist_length = LZ77Coder._sep2 + nsc.number_to_system(match_distance) + LZ77Coder._sep1 \
+                          + nsc.number_to_system(lookahead) + LZ77Coder._sep2
             # cursor += lookahead
             # if cursor < len(msg):
             #     dist_length += msg[cursor]
@@ -71,8 +72,6 @@ class LZ77Coder:
                 # Emit only next character
                 msg_enc += msg[cursor]
                 cursor += 1
-        # first character is a separator, ignore it
-        # return msg_enc[1:]
         return msg_enc
 
     @staticmethod
@@ -91,25 +90,14 @@ class LZ77Coder:
             sep1_pos = msg_enc.find(LZ77Coder._sep1)
             sep2_pos = msg_enc.find(LZ77Coder._sep2)
             # decode and copy next matched substring
-            match_dist = int(msg_enc[:sep1_pos])
-            match_length = int(msg_enc[sep1_pos+1: sep2_pos])
+            match_dist = nsc.system_to_number(msg_enc[:sep1_pos])
+            match_length = nsc.system_to_number(msg_enc[sep1_pos+1: sep2_pos])
             match_start = len(msg_dec) - match_dist
             msg_dec += msg_dec[match_start-match_length: match_start]
             msg_enc = msg_enc[sep2_pos+1:]
         # copy remaining substring
         msg_dec += msg_enc
         return msg_dec
-
-        # offset+length+character triples
-        # olc_s = msg_enc.split(LZ77Coder._sep2)
-        # for olc in olc_s:
-        #     offset, length, character = olc.split(LZ77Coder._sep1)
-        #     offset, length = int(offset), int(length)
-        #     msg_dec += msg_dec[len(msg_dec)-offset: len(msg_dec)-offset+length] + character
-        # return msg_dec
-
-
-
 
 
 if __name__ == '__main__':
