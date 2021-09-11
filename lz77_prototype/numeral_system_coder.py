@@ -1,5 +1,5 @@
 import numpy as np
-import lz77_side_channel as lz_sc
+import lz77_prototype.lz77_side_channel as lz_sc
 
 
 """Conversion of 10-base numbers into higher base - all (printable) 

@@ -2,8 +2,8 @@ import random
 import re
 import math
 # from .lz77_one import random_msg
-import numeral_system_coder as nsc
-import string_binary
+import lz77_prototype.numeral_system_coder as nsc
+import lz77_prototype.string_binary as string_binary
 
 def random_msg(alphabet, length):
     """Generates random message from an alphabet"""

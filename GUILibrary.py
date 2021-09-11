@@ -1,8 +1,8 @@
 """ Module with GUI components """
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QLabel, QFileDialog, QPushButton, QSizePolicy, QGridLayout, QRadioButton, \
-    QMessageBox
-import LZ77Algo as lz
+    QMessageBox, QLineEdit, QDialog, QDialogButtonBox
+import AppLogic as lz
 
 WINDOW_SIZE = 600, 200
 FONT = QFont('Arial', 14)
@@ -35,10 +35,10 @@ class MainWindow:
         self.file_path_label.setFont(QFont('Arial', 10))
         self.options_label = QLabel("Options")
         self.options_label.setFont(FONT)
-        self.option1_rbtn = QRadioButton("LZ77 Side channel")
+        self.option1_rbtn = QRadioButton("LZ77 Traditional")
         self.option1_rbtn.setChecked(True)
         self.option1_rbtn.clicked.connect(lambda: self.checkStateChange(self.option1_rbtn))
-        self.option2_rbtn = QRadioButton("LZ77 Bit recycling")
+        self.option2_rbtn = QRadioButton("LZ77 Side channel")
         self.option2_rbtn.clicked.connect(lambda: self.checkStateChange(self.option2_rbtn))
         self.compress_lz77_btn = QPushButton("Compress")
         self.compress_lz77_btn.clicked.connect(lambda: self.startCompressingProcess())
@@ -86,7 +86,7 @@ class MainWindow:
         """Function handling radio buttons logic and changing choosen algo by user.
         :param btn: clicked button
         :return: none"""
-        if btn.text() == "LZ77 Side channel":
+        if btn.text() == "LZ77 Traditional":
             self.algo_option = 1
         else:
             self.algo_option = 2
@@ -97,7 +97,7 @@ class MainWindow:
         if self.file_path == "":
             noFileMessageBox()
             return
-        algo = lz.LZ77(self.main_window)
+        algo = lz.LZ77(self.main_window, self.algo_option)
         algo.compressFile(self.file_path)
 
     def startDecompressingProcess(self):
@@ -106,5 +106,5 @@ class MainWindow:
         if self.file_path == "":
             noFileMessageBox()
             return
-        algo = lz.LZ77(self.main_window)
+        algo = lz.LZ77(self.main_window, self.algo_option)
         algo.decompressFile(self.file_path)

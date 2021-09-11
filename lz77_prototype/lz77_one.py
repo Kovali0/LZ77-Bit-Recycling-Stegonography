@@ -1,5 +1,5 @@
 import random
-import numeral_system_coder as nsc
+import lz77_prototype.numeral_system_coder as nsc
 
 
 def random_msg(alphabet, length):
