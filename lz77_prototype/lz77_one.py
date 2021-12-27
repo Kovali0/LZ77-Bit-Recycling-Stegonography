@@ -21,10 +21,10 @@ def approx_cnt_word_in_msg(word_length, msg_length, alphabet_size):
 
 class LZ77Coder:
     """Performs the very basic LZ77 encoding & decoding"""
-    # _sep1 = chr(31)
-    # _sep2 = chr(30)
-    _sep1 = '-'
-    _sep2 = '_'
+    _sep1 = chr(31)
+    _sep2 = chr(30)
+    # _sep1 = '-'
+    # _sep2 = '_'
     max_offset = 50000
     max_lookahead = 50
     # minimum length of a match, based on format of encoding of the match
@@ -58,8 +58,8 @@ class LZ77Coder:
             # Decrement lookahead to the largest acceptable value
             lookahead -= 1
             # distance+length double
-            dist_length = LZ77Coder._sep2 + nsc.number_to_system(match_distance) + LZ77Coder._sep1 \
-                          + nsc.number_to_system(lookahead) + LZ77Coder._sep2
+            dist_length = LZ77Coder._sep2 + str(match_distance) + LZ77Coder._sep1 \
+                          + str(lookahead) + LZ77Coder._sep2
             # cursor += lookahead
             # if cursor < len(msg):
             #     dist_length += msg[cursor]
@@ -90,8 +90,8 @@ class LZ77Coder:
             sep1_pos = msg_enc.find(LZ77Coder._sep1)
             sep2_pos = msg_enc.find(LZ77Coder._sep2)
             # decode and copy next matched substring
-            match_dist = nsc.system_to_number(msg_enc[:sep1_pos])
-            match_length = nsc.system_to_number(msg_enc[sep1_pos+1: sep2_pos])
+            match_dist = int(msg_enc[:sep1_pos])
+            match_length = int(msg_enc[sep1_pos+1: sep2_pos])
             match_start = len(msg_dec) - match_dist
             msg_dec += msg_dec[match_start-match_length: match_start]
             msg_enc = msg_enc[sep2_pos+1:]
@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # with open('..\\sample_data\\sampleFICT2.txt') as f:
     #     msg1 = f.read(75000)
     alphabet1 = ['A', 'B']
-    msg1 = random_msg(alphabet1, 20000)
+    msg1 = random_msg(alphabet1, 200)
     # msg1 = "BABAABAAABAAABABABABBAAABABABBAABBBAABBBBABBABAABABBAAABAABAABAABBABAA"
     print(msg1)
     msg1_enc = LZ77Coder.encode(msg1)

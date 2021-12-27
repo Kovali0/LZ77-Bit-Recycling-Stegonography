@@ -5,8 +5,8 @@ import lz77_prototype.lz77_side_channel as lz_sc
 """Conversion of 10-base numbers into higher base - all (printable) 
 ascii characters except LZ77 coder separators"""
 _alphabet = [chr(i) for i in range(32, 127)]
-_alphabet.remove(lz_sc.LZ77MultiChoiceCoder._sep1)
-_alphabet.remove(lz_sc.LZ77MultiChoiceCoder._sep2)
+# _alphabet.remove(lz_sc.LZ77MultiChoiceCoder._sep1)
+# _alphabet.remove(lz_sc.LZ77MultiChoiceCoder._sep2)
 # _alphabet.remove('-')
 # _alphabet.remove('_')
 _base = len(_alphabet)

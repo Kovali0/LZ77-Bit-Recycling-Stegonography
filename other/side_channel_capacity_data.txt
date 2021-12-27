@@ -1,0 +1,23 @@
+# Experimental capacities (n.o. 7-bit characters) of the side channel for different input messages
+random_msg(['A', 'B'], 10000)
+mean = 41, std = 3.1
+random_msg(['A', 'B'], 30000)
+mean = 112
+random_msg(['A', 'B', 'C'], 10000)
+mean = 93
+random_msg(['A', 'B', 'C', 'D'], 10000)
+mean = 59
+random_msg(['A', 'B', 'C', 'D', 'E'], 10000)
+mean = 14.4
+random_msg(['A', 'B', 'C', 'D', 'E'], 30000)
+mean = 161
+random_msg(list(' ABCDEFGHI'), 300000)
+mean = 7.1, std = 1
+sampleFICT2.txt, 10000
+43
+sampleFICT2.txt, 30000
+221
+dickens.txt, 20000
+100
+dickens.txt, 50000
+388

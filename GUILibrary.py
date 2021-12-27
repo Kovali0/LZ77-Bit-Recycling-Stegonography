@@ -16,7 +16,7 @@ def noFileMessageBox():
 class MainWindow:
     def __init__(self):
         """GUI initialization function for the whole program.
-        :return: main_window - QWidget object, which represent application main window fully connected with other modules"""
+        :return: main_window - QWidget object, which represent application main window fully connected with other_help modules"""
         self.main_window = QWidget()
         self.main_window.resize(WINDOW_SIZE[0], WINDOW_SIZE[1])
         self.main_window.setMinimumSize(WINDOW_SIZE[0], WINDOW_SIZE[1])
