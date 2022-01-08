@@ -5,6 +5,7 @@ import abc
 import lz77_prototype.numeral_system_coder as nsc
 import lz77_prototype.string_binary as string_binary
 from lz77_prototype.search import find_last, find_all
+import cProfile
 
 
 def random_msg(alphabet, length):
@@ -330,11 +331,11 @@ def test_all():
     print(os.listdir('..\\sample_data'))
     fname = '..\\sample_data\\dickens.txt'
     with open(fname, 'r') as f:
-        msg1 = f.read(10000)
+        msg1 = f.read(40000)
     # alphabet = ['A', 'B']
     # msg1 = random_msg(alphabet, 10000)
 
-    lz_coder = LZ77AllChoicesCoder()
+    lz_coder = LZ77LastTwoChoicesCoder()
     msg1_n_hidden_bits = lz_coder.start_encoding_get_capacity(msg1)
     print("Hidden channel capacity: {} ({} characters)".format(msg1_n_hidden_bits,
                                                                lz_coder.hidden_capacity_characters()))
@@ -358,7 +359,7 @@ def test_all():
     print("Encoded message length:", msg1_enc_len)
     # print("Encoded message, reduced:", msg1_enc_extra_len)
     print("Compression ratio:", msg1_enc_len / len(msg1))
-    print("encoded msg1:", msg1_enc)
+    # print("encoded msg1:", msg1_enc)
     msg1_dec, hidden_msg1_dec = lz_coder.decode(msg1_enc)
     # print("decoded msg1:", msg1_dec)
     print("hidden msg decoded:", hidden_msg1_dec)
@@ -378,4 +379,4 @@ def test_all():
 
 
 if __name__ == '__main__':
-    test_capacity()
+    cProfile.run("test_all()", sort="cumtime")
